@@ -24,6 +24,15 @@
 }
 ```
 
+## Metassets related to the action (non-exhaustive, optional and encrypted)
+
+```javascript
+{
+    "kycValidator",
+    "kycDocumentation"
+}
+```
+
 ## Functions
 
 ```javascript
