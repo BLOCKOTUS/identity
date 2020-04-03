@@ -6,7 +6,7 @@
 {
     "id",
     "registryDate",
-    "verions",
+    "versions",
     "nationalId",
     "attributes"
 }
