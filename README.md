@@ -28,7 +28,7 @@
 
 ```javascript
 {
-    "kycValidator",
+    "kycValidatorId", //identityId
     "kycDocumentation"
 }
 ```
@@ -41,4 +41,10 @@
     "update",
     "delete"
 }
+```
+
+## Getting started
+
+```bash
+
 ```
