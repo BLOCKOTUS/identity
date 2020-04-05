@@ -45,9 +45,8 @@
 
 ## Getting started
 
-```bash
-
-```
+- install nvm
+- use node v10.15.2
 
 ## How to contribute
 
