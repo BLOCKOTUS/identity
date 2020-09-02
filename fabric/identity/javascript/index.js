@@ -39,6 +39,7 @@ async function getContractAndGateway({username, contract}) {
 
 async function create({
 	encryptedIdentity,
+	override = "false",
 	user
 }) {
 	try{
@@ -48,7 +49,7 @@ async function create({
 
 		// get contract, submit transaction and disconnect
 		var {contract, gateway} = await getContractAndGateway({username: user.username, contract: 'Identity'});
-		var response = await contract.submitTransaction('createIdentity', encryptedIdentity);
+		var response = await contract.submitTransaction('createIdentity', encryptedIdentity, override);
 		console.log('Transaction has been submitted', response);
 		await gateway.disconnect();
 	

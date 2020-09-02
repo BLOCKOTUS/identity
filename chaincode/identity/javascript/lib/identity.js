@@ -29,6 +29,11 @@ class Identity extends Contract {
 
     }
 
+    async exists(ctx, key) {
+        const existing = await ctx.stub.getState(key);
+        return existing.toString();
+    }
+
     async queryIdentity(ctx) {
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
@@ -43,15 +48,25 @@ class Identity extends Contract {
         return identityAsBytes.toString();
     }
 
+    // params[0]: encryptedIdentity
+    // params[1]: override
     async createIdentity(ctx) {
         console.info('============= START : Create identity ===========');
 
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
-        this.validateParams(params, 1);
+        this.validateParams(params, 2);
 
         const id = this.getCreatorId(ctx)
-        const value = {encryptedIdentity: params[0]};
+        const encryptedIdentity = params[0];
+        const override = params[1];
+
+        if (override !== 'true'){
+            let exists = await this.exists(ctx, id);
+            if (exists) throw new Error(`${id} already exists.`);
+        }
+
+        const value = { encryptedIdentity };
 
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
         console.info(`============= END : Create identity ${JSON.stringify(value)} ===========`);
