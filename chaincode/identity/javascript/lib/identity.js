@@ -16,29 +16,30 @@ class Identity extends Contract {
         if(params.length !== count) throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`);
     }
 
-    getCreatorId(ctx) {
-        const clientId = ctx.clientIdentity.id;
-        const mspId = ctx.clientIdentity.mspId;
-        const id = `${mspId}::${clientId}`;
-        return id;
+    async getCreatorId(ctx) {
+        const rawId = await ctx.stub.invokeChaincode("helper", ["getCreatorId"], "mychannel");
+        if (rawId.status !== 200) throw new Error(rawId.message);
+        
+        return rawId.payload.toString('utf8');
     }
 
-    getTimestamp(ctx) {
-        const timestamp = ctx.stub.getTxTimestamp();
-        return `${timestamp.seconds}${timestamp.nanos}`;
-
+    async getTimestamp(ctx) {
+        const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
+        if (rawTs.status !== 200) throw new Error(rawId.message);
+        
+        return rawTs.payload.toString('utf8');
     }
 
     async exists(ctx, key) {
         const existing = await ctx.stub.getState(key);
-        return existing.toString();
+        return !existing.toString() ? false : true;
     }
 
     async queryIdentity(ctx) {
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
         
-        const key = params.length === 1 ? params[0] : this.getCreatorId(ctx);
+        const key = params.length === 1 ? params[0] : await this.getCreatorId(ctx);
 
         const identityAsBytes = await ctx.stub.getState(key);
         if (!identityAsBytes || identityAsBytes.length === 0) {
@@ -57,13 +58,13 @@ class Identity extends Contract {
         const params = args.params;
         this.validateParams(params, 2);
 
-        const id = this.getCreatorId(ctx)
+        const id = await this.getCreatorId(ctx)
         const encryptedIdentity = params[0];
         const override = params[1];
 
         if (override !== 'true'){
-            let exists = await this.exists(ctx, id);
-            if (exists) throw new Error(`${id} already exists.`);
+            const idExists = await this.exists(ctx, id);
+            if (idExists) throw new Error(`${id} already exists.`);
         }
 
         const value = { encryptedIdentity };
