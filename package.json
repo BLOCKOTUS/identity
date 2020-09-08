@@ -1,6 +1,6 @@
 {
   "name": "identity",
-  "version": "1.0.0",
+  "version": "0.1.0-alpha",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,8 +15,5 @@
   "bugs": {
     "url": "https://github.com/BLOCKOTUS/identity/issues"
   },
-  "homepage": "https://github.com/BLOCKOTUS/identity#readme",
-  "dependencies": {
-    "fabric-network": "^2.2.0"
-  }
+  "homepage": "https://github.com/BLOCKOTUS/identity#readme"
 }
