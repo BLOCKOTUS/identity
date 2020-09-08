@@ -35,10 +35,12 @@ class Identity extends Contract {
         return !existing.toString() ? false : true;
     }
 
-    async queryIdentity(ctx) {
+    async getIdentity(ctx) {
+        console.info('============= Get identity ===========');
+
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
-        
+
         const key = params.length === 1 ? params[0] : await this.getCreatorId(ctx);
 
         const identityAsBytes = await ctx.stub.getState(key);

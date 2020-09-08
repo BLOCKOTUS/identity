@@ -41,7 +41,38 @@ async function create({
 	})
 }
 
+async function get({
+	user
+}) {
+	return new Promise(async (resolve, reject) => {
+		// create wallet
+		const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
+		fs.writeFileSync(walletPath, JSON.stringify(user.wallet))
+
+		// get contract, submit transaction and disconnect
+		var {contract, gateway} = await
+			getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
+				.catch(reject);
+
+		var response = await
+			contract
+				.submitTransaction('getIdentity')
+				.catch(reject);
+
+		const identity = JSON.parse(response.toString('utf8'))
+		console.log('Transaction has been submitted');
+
+		//disconnect
+		await gateway.disconnect();
+
+		resolve(identity);
+
+		return;
+	})
+}
+
 
 module.exports = {
 	create,
+	get,
 }
