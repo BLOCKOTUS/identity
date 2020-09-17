@@ -42,7 +42,8 @@ async function create({
 }
 
 async function get({
-	user
+	user,
+	identityId
 }) {
 	return new Promise(async (resolve, reject) => {
 		// create wallet
@@ -54,10 +55,17 @@ async function get({
 			getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
 				.catch(reject);
 
-		var response = await
-			contract
+		
+		var response = 
+			identityId
+			? await contract
+				.submitTransaction('getIdentity', identityId)
+				.catch(reject)
+			: await contract
 				.submitTransaction('getIdentity')
 				.catch(reject);
+
+		console.log(response.toString('utf8'))
 
 		const identity = JSON.parse(response.toString('utf8'))
 		console.log('Transaction has been submitted');
