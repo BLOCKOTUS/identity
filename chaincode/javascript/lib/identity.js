@@ -6,75 +6,106 @@
 
 const { Contract } = require('fabric-contract-api');
 
+const CONFIRMATIONS_NEEDED_FOR_KYC = 3;
+
 class Identity extends Contract {
+	// "PRIVATE"
 
-    async initLedger(ctx) {
-      
-    }
+	async initLedger(ctx) {
 
-    validateParams(params, count) {
-        if(params.length !== count) throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`);
-    }
+	}
 
-    async getCreatorId(ctx) {
-        const rawId = await ctx.stub.invokeChaincode("helper", ["getCreatorId"], "mychannel");
-        if (rawId.status !== 200) throw new Error(rawId.message);
-        
-        return rawId.payload.toString('utf8');
-    }
+	validateParams(params, count) {
+		if(params.length !== count) throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`);
+	}
 
-    async getTimestamp(ctx) {
-        const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
-        if (rawTs.status !== 200) throw new Error(rawId.message);
-        
-        return rawTs.payload.toString('utf8');
-    }
+	async getCreatorId(ctx) {
+		const rawId = await ctx.stub.invokeChaincode("helper", ["getCreatorId"], "mychannel");
+		if (rawId.status !== 200) throw new Error(rawId.message);
+		
+		return rawId.payload.toString('utf8');
+	}
 
-    async exists(ctx, key) {
-        const existing = await ctx.stub.getState(key);
-        return !existing.toString() ? false : true;
-    }
+	async getTimestamp(ctx) {
+		const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
+		if (rawTs.status !== 200) throw new Error(rawId.message);
+		
+		return rawTs.payload.toString('utf8');
+	}
 
-    async getIdentity(ctx) {
-        console.info('============= Get identity ===========');
+	async exists(ctx, key) {
+		const existing = await ctx.stub.getState(key);
+		return !existing.toString() ? false : true;
+	}
 
-        const args = ctx.stub.getFunctionAndParameters();
-        const params = args.params;
+	async getIdentityById(ctx, id) {
+		const rawIdentity = await ctx.stub.getState(id);
+		const identity = rawJob.toString();
 
-        const key = params.length === 1 ? params[0] : await this.getCreatorId(ctx);
+		console.log('==== identity: ====', JSON.stringify(identity))
+		
+		return identity;
+	}
 
-        const identityAsBytes = await ctx.stub.getState(key);
-        if (!identityAsBytes || identityAsBytes.length === 0) {
-            throw new Error(`${key} does not exist`);
-        }
+	// "PUBLIC"
+	async getIdentity(ctx) {
+		console.info('============= Get identity ===========');
 
-        return identityAsBytes.toString();
-    }
+		const args = ctx.stub.getFunctionAndParameters();
+		const params = args.params;
 
-    // params[0]: encryptedIdentity
-    // params[1]: override
-    async createIdentity(ctx) {
-        console.info('============= START : Create identity ===========');
+		const key = params.length === 1 ? params[0] : await this.getCreatorId(ctx);
 
-        const args = ctx.stub.getFunctionAndParameters();
-        const params = args.params;
-        this.validateParams(params, 2);
+		const identity = await ctx.stub.getState(key);
+		if (!identity || identity.length === 0) throw new Error(`${key} does not exist`);
 
-        const id = await this.getCreatorId(ctx)
-        const encryptedIdentity = params[0];
-        const override = params[1];
+		const identityObject = JSON.parse(identity);
+		var withConfirmationsIdentity = { ...identityObject, confirmations: [0,0], kyc: false};
 
-        if (override !== 'true'){
-            const idExists = await this.exists(ctx, id);
-            if (idExists) throw new Error(`${id} already exists.`);
-        }
+		// get jobId
+		const rawJobList = await ctx.stub.invokeChaincode("job", ["listJobByChaincodeAndKey", "identity", key], "mychannel");
+		if (rawJobList.status !== 200) throw new Error(rawJobList.message);
+		const jobList = JSON.parse(rawJobList.payload.toString('utf8'));
+		if(jobList.length === 0) return JSON.stringify(withConfirmationsIdentity).toString();
+		const jobId = jobList[0].jobId;
+		
+		// get job results
+		const rawJobResults = await ctx.stub.invokeChaincode("job", ["getJobResults", jobId], "mychannel");
+		if (rawJobResults.status !== 200) throw new Error(rawJobResults.message);
+		const jobResults = JSON.parse(rawJobResults.payload.toString('utf8'));
+		if(Object.keys(jobResults).length === 0) return JSON.stringify(withConfirmationsIdentity).toString();
+		var one = jobResults['1'] ? jobResults['1'] : 0;
+		var zero = jobResults['0'] ? jobResults['0'] : 0;
+		var kyc = one >= CONFIRMATIONS_NEEDED_FOR_KYC && (one/(one+zero)) >= (5/6) ? true : false;
+		const confirmations = [one, (zero + one)];
+		const idWithConfirmations = { ...identityObject, confirmations, kyc};
 
-        const value = { encryptedIdentity };
+		return JSON.stringify(idWithConfirmations).toString();
+	}
 
-        await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
-        console.info(`============= END : Create identity ${JSON.stringify(value)} ===========`);
-    }
+	// params[0]: encryptedIdentity
+	// params[1]: override
+	async createIdentity(ctx) {
+		console.info('============= START : Create identity ===========');
 
+		const args = ctx.stub.getFunctionAndParameters();
+		const params = args.params;
+		this.validateParams(params, 2);
+
+		const id = await this.getCreatorId(ctx)
+		const encryptedIdentity = params[0];
+		const override = params[1];
+
+		if (override !== 'true'){
+			const idExists = await this.exists(ctx, id);
+			if (idExists) throw new Error(`${id} already exists.`);
+		}
+
+		const value = { encryptedIdentity };
+
+		await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
+		console.info(`============= END : Create identity ${JSON.stringify(value)} ===========`);
+	}
 }
 
 module.exports = Identity;
