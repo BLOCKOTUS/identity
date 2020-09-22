@@ -26,17 +26,19 @@ async function create({
 			getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
 				.catch(reject);
 
+		if (!contract || !gateway) return;
+
 		var response = await 
 			contract
 				.submitTransaction('createIdentity', encryptedIdentity, override)
 				.catch(reject);
 
-		console.log('Transaction has been submitted', response);
-
 		await gateway.disconnect();
-		
+
+		if (!response) return;
+
+		console.log('Transaction has been submitted', response);
 		resolve();
-		
 		return;
 	})
 }
@@ -55,6 +57,7 @@ async function get({
 			getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
 				.catch(reject);
 
+		if (!contract || !gateway) return;
 		
 		var response = 
 			identityId
@@ -65,16 +68,15 @@ async function get({
 				.submitTransaction('getIdentity')
 				.catch(reject);
 
-		console.log(response.toString('utf8'))
-
-		const identity = JSON.parse(response.toString('utf8'))
-		console.log('Transaction has been submitted');
-
 		//disconnect
 		await gateway.disconnect();
 
-		resolve(identity);
+		if (!response) return;
 
+		const identity = JSON.parse(response.toString('utf8'));
+		
+		console.log('Transaction has been submitted');
+		resolve(identity);
 		return;
 	})
 }
