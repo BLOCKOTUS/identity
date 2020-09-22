@@ -40,8 +40,9 @@ class Identity extends Contract {
 
 	async getIdentityById(ctx, id) {
 		const rawIdentity = await ctx.stub.getState(id);
-		const identity = rawJob.toString();
+		if (!rawIdentity || rawIdentity.length === 0) throw new Error(`${id} does not exist`);
 
+		const identity = rawJob.toString();
 		console.log('==== identity: ====', JSON.stringify(identity))
 		
 		return identity;
@@ -56,9 +57,7 @@ class Identity extends Contract {
 
 		const key = params.length === 1 ? params[0] : await this.getCreatorId(ctx);
 
-		const identity = await ctx.stub.getState(key);
-		if (!identity || identity.length === 0) throw new Error(`${key} does not exist`);
-
+		const identity = await this.getIdentityById(ctx, key);
 		const identityObject = JSON.parse(identity);
 		var withConfirmationsIdentity = { ...identityObject, confirmations: [0,0], kyc: false};
 
