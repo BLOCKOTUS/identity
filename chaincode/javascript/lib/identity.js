@@ -42,7 +42,7 @@ class Identity extends Contract {
 		const rawIdentity = await ctx.stub.getState(id);
 		if (!rawIdentity || rawIdentity.length === 0) throw new Error(`${id} does not exist`);
 
-		const identity = rawJob.toString();
+		const identity = rawIdentity.toString();
 		console.log('==== identity: ====', JSON.stringify(identity))
 		
 		return identity;
