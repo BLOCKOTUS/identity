@@ -11,7 +11,7 @@ const CONFIRMATIONS_NEEDED_FOR_KYC = 3;
 class Identity extends Contract {
 	// "PRIVATE"
 
-	async initLedger(ctx) {
+	async initLedger() {
 
 	}
 
@@ -28,7 +28,7 @@ class Identity extends Contract {
 
 	async getTimestamp(ctx) {
 		const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
-		if (rawTs.status !== 200) throw new Error(rawId.message);
+		if (rawTs.status !== 200) throw new Error(rawTs.message);
 		
 		return rawTs.payload.toString('utf8');
 	}
@@ -43,7 +43,7 @@ class Identity extends Contract {
 		if (!rawIdentity || rawIdentity.length === 0) throw new Error(`${id} does not exist`);
 
 		const identity = rawIdentity.toString();
-		console.log('==== identity: ====', JSON.stringify(identity))
+		console.log('==== identity: ====', JSON.stringify(identity));
 		
 		return identity;
 	}
@@ -91,7 +91,7 @@ class Identity extends Contract {
 		const params = args.params;
 		this.validateParams(params, 2);
 
-		const id = await this.getCreatorId(ctx)
+		const id = await this.getCreatorId(ctx);
 		const encryptedIdentity = params[0];
 		const override = params[1];
 

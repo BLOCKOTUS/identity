@@ -1,9 +1,3 @@
-/*
- * SPDX-License-Identifier: Apache-2.0
- */
-
-'use strict';
-
 const fs = require('fs');
 const path = require('path');
 
@@ -14,12 +8,13 @@ const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
 async function create({
 	encryptedIdentity,
 	override = "false",
-	user
+	user,
 }) {
-	return new Promise(async (resolve, reject) => {
+	/* eslint-disable-next-line no-async-promise-executor */ /* eslint-disable-next-line no-undef */
+	return new Promise (async (resolve, reject) => {
 		// create wallet
 		const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
-		fs.writeFileSync(walletPath, JSON.stringify(user.wallet))
+		fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
 
 		// get contract, submit transaction and disconnect
 		var {contract, gateway} = await 
@@ -40,17 +35,18 @@ async function create({
 		console.log('Transaction has been submitted', response);
 		resolve();
 		return;
-	})
+	});
 }
 
 async function get({
 	user,
-	identityId
+	identityId,
 }) {
+	/* eslint-disable-next-line no-async-promise-executor */ /* eslint-disable-next-line no-undef */
 	return new Promise(async (resolve, reject) => {
 		// create wallet
 		const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
-		fs.writeFileSync(walletPath, JSON.stringify(user.wallet))
+		fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
 
 		// get contract, submit transaction and disconnect
 		var {contract, gateway} = await
@@ -78,11 +74,11 @@ async function get({
 		console.log('Transaction has been submitted');
 		resolve(identity);
 		return;
-	})
+	});
 }
 
 
 module.exports = {
 	create,
 	get,
-}
+};
