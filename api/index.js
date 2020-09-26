@@ -32,7 +32,6 @@ async function create({
 
 		if (!response) return;
 
-		console.log('Transaction has been submitted', response);
 		resolve();
 		return;
 	});
@@ -70,8 +69,6 @@ async function get({
 		if (!response) return;
 
 		const identity = JSON.parse(response.toString('utf8'));
-		
-		console.log('Transaction has been submitted');
 		resolve(identity);
 		return;
 	});
