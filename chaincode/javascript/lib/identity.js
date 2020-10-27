@@ -38,6 +38,12 @@ class Identity extends Contract {
 		return !existing.toString() ? false : true;
 	}
 
+	async hashExists(ctx, uniqueHash) {
+		const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
+		const existing = await ctx.stub.getState(hashIndex);
+		return !existing.toString() ? false : true;
+	}
+
 	async getIdentityById(ctx, id) {
 		const rawIdentity = await ctx.stub.getState(id);
 		if (!rawIdentity || rawIdentity.length === 0) throw new Error(`${id} does not exist`);
@@ -82,8 +88,11 @@ class Identity extends Contract {
 		return JSON.stringify(idWithConfirmations).toString();
 	}
 
-	// params[0]: encryptedIdentity
-	// params[1]: override
+	/**
+	* @param {object} encryptedIdentity
+	* @param {string} uniqueHash
+	* @param {boolean} override
+	*/
 	async createIdentity(ctx) {
 		console.info('============= START : Create identity ===========');
 
@@ -93,15 +102,23 @@ class Identity extends Contract {
 
 		const id = await this.getCreatorId(ctx);
 		const encryptedIdentity = params[0];
-		const override = params[1];
+		const uniqueHash = params[1];
+		const override = params[2];
+
+		const hashExists = await this.hashExists(ctx, uniqueHash);
+		if (hashExists) throw new Error(`${uniqueHash} already exists.`);
 
 		if (override !== 'true'){
 			const idExists = await this.exists(ctx, id);
 			if (idExists) throw new Error(`${id} already exists.`);
 		}
 
-		const value = { encryptedIdentity };
+		// create uniqueHash index
+		const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
+		await ctx.stub.putState(hashIndex, Buffer.from('\u0000'));
 
+		// create identity
+		const value = { encryptedIdentity };
 		await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
 		console.info(`============= END : Create identity ${JSON.stringify(value)} ===========`);
 	}

@@ -7,6 +7,7 @@ const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
 
 async function create({
 	encryptedIdentity,
+	uniqueHash,
 	override = "false",
 	user,
 }) {
@@ -25,7 +26,7 @@ async function create({
 
 		var response = await 
 			contract
-				.submitTransaction('createIdentity', encryptedIdentity, override)
+				.submitTransaction('createIdentity', encryptedIdentity, uniqueHash, override)
 				.catch(reject);
 
 		await gateway.disconnect();
