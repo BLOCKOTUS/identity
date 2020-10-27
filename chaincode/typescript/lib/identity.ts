@@ -48,10 +48,10 @@ export class Identity extends Contract {
     }
 
     /**
-	* @param {object} encryptedIdentity
-	* @param {string} uniqueHash
-	* @param {boolean} override
-	*/
+    * @param {object} encryptedIdentity
+    * @param {string} uniqueHash
+    * @param {boolean} override
+    */
     public async createIdentity(ctx: Context) {
         console.info('============= START : Create identity ===========');
 
@@ -65,7 +65,7 @@ export class Identity extends Contract {
         const override = params[2];
 
         const hashExists = await this.hashExists(ctx, uniqueHash);
-		if (hashExists) throw new Error(`${uniqueHash} already exists.`);
+        if (hashExists) throw new Error(`${uniqueHash} already exists.`);
 
         if (override !== 'true') {
             const idExists = await this.exists(ctx, id);
@@ -73,8 +73,8 @@ export class Identity extends Contract {
         }
 
         // create uniqueHash index
-		const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
-		await ctx.stub.putState(hashIndex, Buffer.from('\u0000'));
+        const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
+        await ctx.stub.putState(hashIndex, Buffer.from('\u0000'));
 
         // create identity
         const value = { encryptedIdentity };
@@ -104,7 +104,7 @@ export class Identity extends Contract {
     }
 
     private async hashExists(ctx: Context, uniqueHash: string) {
-		const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
+        const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
         const existing = await ctx.stub.getState(hashIndex);
         return !existing.toString() ? false : true;
     }
