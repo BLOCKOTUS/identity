@@ -57,7 +57,7 @@ export class Identity extends Contract {
 
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
-        this.validateParams(params, 2);
+        this.validateParams(params, 3);
 
         const id = await this.getCreatorId(ctx);
         const encryptedIdentity = params[0];
