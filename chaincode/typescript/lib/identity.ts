@@ -47,26 +47,37 @@ export class Identity extends Contract {
         return JSON.stringify(idWithConfirmations).toString();
     }
 
-    // params[0]: encryptedIdentity
-    // params[1]: override
+    /**
+    * @param {object} encryptedIdentity
+    * @param {string} uniqueHash
+    * @param {boolean} override
+    */
     public async createIdentity(ctx: Context) {
         console.info('============= START : Create identity ===========');
 
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
-        this.validateParams(params, 2);
+        this.validateParams(params, 3);
 
         const id = await this.getCreatorId(ctx);
         const encryptedIdentity = params[0];
-        const override = params[1];
+        const uniqueHash = params[1];
+        const override = params[2];
+
+        const hashExists = await this.hashExists(ctx, uniqueHash);
+        if (hashExists) throw new Error(`${uniqueHash} already exists.`);
 
         if (override !== 'true') {
             const idExists = await this.exists(ctx, id);
             if (idExists) { throw new Error(`${id} already exists.`); }
         }
 
-        const value = { encryptedIdentity };
+        // create uniqueHash index
+        const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
+        await ctx.stub.putState(hashIndex, Buffer.from('\u0000'));
 
+        // create identity
+        const value = { encryptedIdentity };
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
         console.info(`============= END : Create identity ${JSON.stringify(value)} ===========`);
     }
@@ -87,12 +98,18 @@ export class Identity extends Contract {
         return rawTs.payload.toString();
     }
 
-    private async exists(ctx: Context, key) {
+    private async exists(ctx: Context, key: string) {
         const existing = await ctx.stub.getState(key);
         return !existing.toString() ? false : true;
     }
 
-    private async getIdentityById(ctx: Context, id) {
+    private async hashExists(ctx: Context, uniqueHash: string) {
+        const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
+        const existing = await ctx.stub.getState(hashIndex);
+        return !existing.toString() ? false : true;
+    }
+
+    private async getIdentityById(ctx: Context, id: string) {
         const rawIdentity = await ctx.stub.getState(id);
         if (!rawIdentity || rawIdentity.length === 0) { throw new Error(`${id} does not exist`); }
 

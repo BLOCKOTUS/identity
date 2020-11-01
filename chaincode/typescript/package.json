@@ -1,6 +1,6 @@
 {
     "name": "blockotus-organ-identity-chaincode-typescript",
-    "version": "0.1.7-beta",
+    "version": "0.2.1-alpha",
     "description": "identity chaincode implemented in node.js",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
