@@ -77,7 +77,7 @@ export class Identity extends Contract {
         await ctx.stub.putState(hashIndex, Buffer.from('\u0000'));
 
         // create identity
-        const value = { encryptedIdentity };
+        const value = { encryptedIdentity, uniqueHash };
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
         console.info(`============= END : Create identity ${JSON.stringify(value)} ===========`);
     }
