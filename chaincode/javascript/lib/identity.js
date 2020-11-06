@@ -49,15 +49,14 @@ class Identity extends Contract {
         if (!rawIdentity || rawIdentity.length === 0) throw new Error(`${id} does not exist`);
 
         const identity = rawIdentity.toString();
-        console.log('==== identity: ====', JSON.stringify(identity));
-        
         return identity;
     }
 
     // "PUBLIC"
+    /**
+    * @param {string} key
+    */
     async getIdentity(ctx) {
-        console.info('============= Get identity ===========');
-
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
 
@@ -88,14 +87,12 @@ class Identity extends Contract {
         return JSON.stringify(idWithConfirmations).toString();
     }
 
-    /**
-    * @param {object} encryptedIdentity
+   /**
+    * @param {string} encryptedIdentity
     * @param {string} uniqueHash
-    * @param {boolean} override
+    * @param {string} override
     */
     async createIdentity(ctx) {
-        console.info('============= START : Create identity ===========');
-
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
         this.validateParams(params, 3);
@@ -120,7 +117,6 @@ class Identity extends Contract {
         // create identity
         const value = { encryptedIdentity, uniqueHash };
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
-        console.info(`============= END : Create identity ${JSON.stringify(value)} ===========`);
     }
 }
 
