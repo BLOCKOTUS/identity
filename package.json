@@ -1,6 +1,6 @@
 {
   "name": "blockotus-organ-identity",
-  "version": "0.2.2-alpha",
+  "version": "0.2.3-alpha",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,7 @@
   },
   "author": "Daniel Febrero",
   "license": "AGPL-3.0",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/BLOCKOTUS/identity/issues"
   },
