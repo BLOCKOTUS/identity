@@ -41,9 +41,12 @@ export class Identity extends Contract {
     }
 
     /**
-    * @param {string} key
-    */
-    public async getIdentity(ctx: Context) {
+     * Get an identity.
+     * If no key is provided, we use the transaction submitter id (creatorId).
+     * 
+     * @param {string} key
+     */
+    public async getIdentity(ctx: Context): Promise<string> {
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
 
@@ -79,11 +82,13 @@ export class Identity extends Contract {
     }
 
     /**
-    * @param {string} encryptedIdentity
-    * @param {string} uniqueHash
-    * @param {string} override
-    */
-    public async createIdentity(ctx: Context) {
+     * Creates an identity.
+     * 
+     * @param {string} encryptedIdentity
+     * @param {string} uniqueHash
+     * @param {string} override
+     */
+    public async createIdentity(ctx: Context): Promise<void> {
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
         this.validateParams(params, 3);
@@ -113,34 +118,63 @@ export class Identity extends Contract {
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
     }
 
-    private validateParams(params, count) {
+    /**
+     * Validate the params received as arguments by a public functions.
+     * Params are stored in the Context.
+     * 
+     * @param {string[]} params params received by a pubic function
+     * @param {number} count number of params expected
+     */
+    private validateParams(params: string[], count: number): void {
         if (params.length !== count) { throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`); }
     }
 
-    private async getCreatorId(ctx: Context) {
+    /**
+     * Get the creatorId (transaction submitter unique id) from the Helper organ.
+     */
+    private async getCreatorId(ctx: Context): Promise<string> {
         const rawId = await ctx.stub.invokeChaincode('helper', ['getCreatorId'], 'mychannel');
         if (rawId.status !== 200) { throw new Error(rawId.message); }
         return rawId.payload.toString();
     }
 
-    private async getTimestamp(ctx: Context) {
+    /**
+     * Get the timestamp from the Helper organ.
+     */
+    private async getTimestamp(ctx: Context): Promise<string> {
         const rawTs = await ctx.stub.invokeChaincode('helper', ['getTimestamp'], 'mychannel');
         if (rawTs.status !== 200) { throw new Error(rawTs.message); }
         return rawTs.payload.toString();
     }
 
-    private async exists(ctx: Context, key: string) {
+    /**
+     * Check if a creatorId already own an identity.
+     * 
+     * @param {string} key creatorId
+     */
+    private async exists(ctx: Context, key: string): Promise<boolean> {
         const existing = await ctx.stub.getState(key);
         return !existing.toString() ? false : true;
     }
 
-    private async hashExists(ctx: Context, uniqueHash: string) {
+    /**
+     * Check if a uniqueHash is already registered.
+     * Each identity has a deterministic uniqueHash.
+     * 
+     * @param {string} uniqueHash uniqueHash
+     */
+    private async hashExists(ctx: Context, uniqueHash: string): Promise<boolean> {
         const hashIndex = await ctx.stub.createCompositeKey('type~value', ['uniqueHash', uniqueHash]);
         const existing = await ctx.stub.getState(hashIndex);
         return !existing.toString() ? false : true;
     }
 
-    private async getIdentityById(ctx: Context, id: string) {
+    /**
+     * Get an identity by creatorId.
+     * 
+     * @param {string} id creatorId
+     */
+    private async getIdentityById(ctx: Context, id: string): Promise<string> {
         const rawIdentity = await ctx.stub.getState(id);
         if (!rawIdentity || rawIdentity.length === 0) { throw new Error(`${id} does not exist`); }
 

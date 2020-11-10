@@ -5,6 +5,11 @@ import { getContractAndGateway } from '../../helper/api/index.minified.js';
 
 const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
 
+/**
+ * Creates an identity on the network.
+ * Each indentity is unique (uniqueHash).
+ * A user can choose to override his identity.
+ */
 export const create = async({
     encryptedIdentity,
     uniqueHash,
@@ -37,6 +42,9 @@ export const create = async({
     });
 };
 
+/**
+ * Retrieves an identity from the network.
+ */
 export const get = async ({
     user,
     identityId,
