@@ -1,21 +1,21 @@
 "use strict";
 
-require("core-js/modules/es.array.join");
+require("core-js/modules/es.array.join.js");
 
-require("core-js/modules/es.date.to-string");
+require("core-js/modules/es.date.to-string.js");
 
-require("core-js/modules/es.object.to-string");
+require("core-js/modules/es.object.to-string.js");
 
-require("core-js/modules/es.promise");
+require("core-js/modules/es.promise.js");
 
-require("core-js/modules/es.regexp.to-string");
+require("core-js/modules/es.regexp.to-string.js");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.get = exports.create = void 0;
 
-require("regenerator-runtime/runtime");
+require("regenerator-runtime/runtime.js");
 
 var _fs = _interopRequireDefault(require("fs"));
 
@@ -45,7 +45,7 @@ var create = /*#__PURE__*/function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            encryptedIdentity = _ref.encryptedIdentity, uniqueHash = _ref.uniqueHash, _ref$override = _ref.override, override = _ref$override === void 0 ? "false" : _ref$override, user = _ref.user;
+            encryptedIdentity = _ref.encryptedIdentity, uniqueHash = _ref.uniqueHash, _ref$override = _ref.override, override = _ref$override === void 0 ? 'false' : _ref$override, user = _ref.user;
             return _context2.abrupt("return", new Promise( /*#__PURE__*/function () {
               var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(resolve, reject) {
                 var walletPath, _yield$getContractAnd, contract, gateway, response;

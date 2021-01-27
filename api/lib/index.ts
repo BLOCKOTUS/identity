@@ -13,7 +13,7 @@ const WALLET_PATH = path.join(__dirname, '..', '..', '..', '..', 'wallet');
 export const create = async({
     encryptedIdentity,
     uniqueHash,
-    override = "false",
+    override = 'false',
     user,
 }) => {
     return new Promise (async (resolve, reject) => {
@@ -22,20 +22,20 @@ export const create = async({
         fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
 
         // get contract, submit transaction and disconnect
-        var {contract, gateway} = await 
+        const {contract, gateway} = await
             getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
                 .catch(reject);
 
-        if (!contract || !gateway) return;
+        if (!contract || !gateway) { return; }
 
-        var response = await 
+        const response = await
             contract
                 .submitTransaction('createIdentity', encryptedIdentity, uniqueHash, override)
                 .catch(reject);
 
         await gateway.disconnect();
 
-        if (!response) return;
+        if (!response) { return; }
 
         resolve();
         return;
@@ -55,13 +55,13 @@ export const get = async ({
         fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
 
         // get contract, submit transaction and disconnect
-        var {contract, gateway} = await
+        const {contract, gateway} = await
             getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
                 .catch(reject);
 
-        if (!contract || !gateway) return;
-        
-        var response = 
+        if (!contract || !gateway) { return; }
+
+        const response =
             identityId
             ? await contract
                 .submitTransaction('getIdentity', identityId)
@@ -70,10 +70,10 @@ export const get = async ({
                 .submitTransaction('getIdentity')
                 .catch(reject);
 
-        //disconnect
+        // disconnect
         await gateway.disconnect();
 
-        if (!response) return;
+        if (!response) { return; }
 
         const identity = JSON.parse(response.toString('utf8'));
         resolve(identity);
