@@ -4,7 +4,8 @@
 
 'use strict';
 
-import { Context, Contract } from 'fabric-contract-api';
+import { Context } from 'fabric-contract-api';
+import { BlockotusContract } from 'hyperledger-fabric-chaincode-helper';
 
 type CreatorId = string;
 
@@ -34,7 +35,7 @@ type JobResults = Array<JobResult>;
 
 const CONFIRMATIONS_NEEDED_FOR_KYC = 3;
 
-export class Identity extends Contract {
+export class Identity extends BlockotusContract {
 
     public async initLedger() {
         console.log('initLedger');
@@ -51,7 +52,7 @@ export class Identity extends Contract {
         const params = args.params;
 
         // get key from function argument
-        const key: CreatorId = params.length === 1 ? params[0] : await this.getCreatorId(ctx);
+        const key: CreatorId = params.length === 1 ? params[0] : this.getUniqueClientId(ctx);
 
         // get identity
         const identity = await this.getIdentityById(ctx, key);
@@ -94,7 +95,7 @@ export class Identity extends Contract {
         this.validateParams(params, 3);
 
         // get params from function argument
-        const id: CreatorId = await this.getCreatorId(ctx);
+        const id: CreatorId = this.getUniqueClientId(ctx);
         const encryptedIdentity: string = params[0];
         const uniqueHash: string = params[1];
         const override: string = params[2];
@@ -127,24 +128,6 @@ export class Identity extends Contract {
      */
     private validateParams(params: string[], count: number): void {
         if (params.length !== count) { throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`); }
-    }
-
-    /**
-     * Get the creatorId (transaction submitter unique id) from the Helper organ.
-     */
-    private async getCreatorId(ctx: Context): Promise<string> {
-        const rawId = await ctx.stub.invokeChaincode('helper', ['getCreatorId'], 'mychannel');
-        if (rawId.status !== 200) { throw new Error(rawId.message); }
-        return rawId.payload.toString();
-    }
-
-    /**
-     * Get the timestamp from the Helper organ.
-     */
-    private async getTimestamp(ctx: Context): Promise<string> {
-        const rawTs = await ctx.stub.invokeChaincode('helper', ['getTimestamp'], 'mychannel');
-        if (rawTs.status !== 200) { throw new Error(rawTs.message); }
-        return rawTs.payload.toString();
     }
 
     /**
