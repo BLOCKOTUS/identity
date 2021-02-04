@@ -61,8 +61,7 @@ export class Identity extends BlockotusContract {
      * @param {string} key
      */
     public async getIdentity(ctx: Context): Promise<string> {
-        const args = ctx.stub.getFunctionAndParameters();
-        const params = args.params;
+        const params = this.getParams(ctx);
 
         // get key from function argument
         const key: CreatorId = params.length === 1 ? params[0] : this.getUniqueClientId(ctx);
@@ -103,9 +102,7 @@ export class Identity extends BlockotusContract {
      * @param {string} override
      */
     public async createIdentity(ctx: Context): Promise<void> {
-        const args = ctx.stub.getFunctionAndParameters();
-        const params = args.params;
-        this.validateParams(params, 3);
+        const params = this.getParams(ctx, { length: 3 });
 
         // get params from function argument
         const id: CreatorId = this.getUniqueClientId(ctx);
@@ -130,17 +127,6 @@ export class Identity extends BlockotusContract {
         // create identity
         const value = { encryptedIdentity, uniqueHash };
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
-    }
-
-    /**
-     * Validate the params received as arguments by a public functions.
-     * Params are stored in the Context.
-     * 
-     * @param {string[]} params params received by a pubic function
-     * @param {number} count number of params expected
-     */
-    private validateParams(params: string[], count: number): void {
-        if (params.length !== count) { throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`); }
     }
 
     /**
