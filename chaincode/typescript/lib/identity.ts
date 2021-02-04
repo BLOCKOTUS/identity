@@ -37,8 +37,21 @@ const CONFIRMATIONS_NEEDED_FOR_KYC = 3;
 
 export class Identity extends BlockotusContract {
 
+    constructor(...args) {
+        super(...args);
+    }
+
     public async initLedger() {
         console.log('initLedger');
+    }
+
+    /**
+     * Cross-contract invokeChaincode() does not support Parent Contract method as far as I know.
+     * This is why we duplicate the method here.
+     * Because the method is called from Did contract https://github.com/BLOCKOTUS/did
+     */
+    public async did(ctx: Context, subject: string, method: string, data: string): Promise<string> {
+        return this.didRequest(ctx, subject, method, data);
     }
 
     /**
@@ -55,7 +68,7 @@ export class Identity extends BlockotusContract {
         const key: CreatorId = params.length === 1 ? params[0] : this.getUniqueClientId(ctx);
 
         // get identity
-        const identity = await this.getIdentityById(ctx, key);
+        const identity = await this.didGet(ctx, key);
         const identityObject: IdentityObject = JSON.parse(identity);
         const withConfirmationsIdentity: IdentityObjectWithKYC = { ...identityObject, confirmations: [0, 0], kyc: false };
 
@@ -152,16 +165,4 @@ export class Identity extends BlockotusContract {
         return !existing.toString() ? false : true;
     }
 
-    /**
-     * Get an identity by creatorId.
-     * 
-     * @param {string} id creatorId
-     */
-    private async getIdentityById(ctx: Context, id: string): Promise<string> {
-        const rawIdentity = await ctx.stub.getState(id);
-        if (!rawIdentity || rawIdentity.length === 0) { throw new Error(`${id} does not exist`); }
-
-        const identity = rawIdentity.toString();
-        return identity;
-    }
 }
