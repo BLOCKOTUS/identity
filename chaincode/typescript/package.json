@@ -1,6 +1,6 @@
 {
     "name": "blockotus-organ-identity-chaincode-typescript",
-    "version": "0.2.6-alpha",
+    "version": "0.2.7-alpha",
     "description": "identity chaincode implemented in node.js",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
@@ -22,7 +22,7 @@
     "dependencies": {
         "fabric-contract-api": "^2.0.0",
         "fabric-shim": "^2.0.0",
-        "hyperledger-fabric-chaincode-helper": "0.0.14"
+        "hyperledger-fabric-chaincode-helper": "^0.0.17"
     },
     "devDependencies": {
         "@types/chai": "^4.1.7",

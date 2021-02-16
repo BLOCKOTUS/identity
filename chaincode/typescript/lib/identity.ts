@@ -130,16 +130,6 @@ export class Identity extends BlockotusContract {
     }
 
     /**
-     * Check if a creatorId already own an identity.
-     * 
-     * @param {string} key creatorId
-     */
-    private async exists(ctx: Context, key: string): Promise<boolean> {
-        const existing = await ctx.stub.getState(key);
-        return !existing.toString() ? false : true;
-    }
-
-    /**
      * Check if a uniqueHash is already registered.
      * Each identity has a deterministic uniqueHash.
      * 
