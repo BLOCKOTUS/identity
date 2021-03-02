@@ -23,7 +23,7 @@ export const create = async({
 
         // get contract, submit transaction and disconnect
         const {contract, gateway} = await
-            getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
+            getContractAndGateway({user, chaincode: 'identity', contract: 'Identity'})
                 .catch(reject);
 
         if (!contract || !gateway) { return; }
@@ -56,7 +56,7 @@ export const get = async ({
 
         // get contract, submit transaction and disconnect
         const {contract, gateway} = await
-            getContractAndGateway({username: user.username, chaincode: 'identity', contract: 'Identity'})
+            getContractAndGateway({user, chaincode: 'identity', contract: 'Identity'})
                 .catch(reject);
 
         if (!contract || !gateway) { return; }
