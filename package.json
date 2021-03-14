@@ -1,6 +1,6 @@
 {
   "name": "blockotus-organ-identity",
-  "version": "0.2.7-alpha",
+  "version": "0.2.8-beta",
   "description": "Hyperledger Fabric Chaincode. BLOCKOTUS Organ. Network Open Standard.",
   "main": "index.js",
   "scripts": {

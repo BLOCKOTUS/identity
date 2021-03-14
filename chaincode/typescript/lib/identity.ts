@@ -11,27 +11,27 @@ type CreatorId = string;
 
 type Confirmations = [number, number];
 
-type IdentityObject = {
+interface IIdentityObject {
     encryptedIdentity: string;
     uniqueHash: string;
-};
+}
 
-type WithKYC = {
+interface IWithKYC {
     kyc: boolean;
     confirmations: Confirmations;
 }
 
-type IdentityObjectWithKYC = IdentityObject & WithKYC;
+type IdentityObjectWithKYC = IIdentityObject & IWithKYC;
 
 type JobId = string;
 
-type Job = { jobId: string };
+interface IJob { jobId: string; }
 
-type JobList = Array<Job>;
+type JobList = IJob[];
 
-type JobResult = { 0: number; 1: number };
+interface IJobResult { 0: number; 1: number; }
 
-type JobResults = Array<JobResult>;
+type JobResults = IJobResult[];
 
 const CONFIRMATIONS_NEEDED_FOR_KYC = 3;
 
@@ -57,7 +57,7 @@ export class Identity extends BlockotusContract {
     /**
      * Get an identity.
      * If no key is provided, we use the transaction submitter id (creatorId).
-     * 
+     *
      * @param {string} key
      */
     public async getIdentity(ctx: Context): Promise<string> {
@@ -69,7 +69,11 @@ export class Identity extends BlockotusContract {
         // get identity
         const identity = await this.didGet(ctx, key);
         const identityObject: IdentityObject = JSON.parse(identity);
-        const withConfirmationsIdentity: IdentityObjectWithKYC = { ...identityObject, confirmations: [0, 0], kyc: false };
+        const withConfirmationsIdentity: IdentityObjectWithKYC = {
+            ...identityObject,
+            confirmations: [0, 0],
+            kyc: false,
+        };
 
         // get jobId of the identity verification job
         const rawJobList = await ctx.stub.invokeChaincode('job', ['listJobByChaincodeAndKey', 'identity', key], 'mychannel');
@@ -96,7 +100,7 @@ export class Identity extends BlockotusContract {
 
     /**
      * Creates an identity.
-     * 
+     *
      * @param {string} encryptedIdentity
      * @param {string} uniqueHash
      * @param {string} override
@@ -112,7 +116,7 @@ export class Identity extends BlockotusContract {
 
         // check if uniqueHash exists, terminates if exists
         const hashExists = await this.hashExists(ctx, uniqueHash);
-        if (hashExists) throw new Error(`${uniqueHash} already exists.`);
+        if (hashExists) { throw new Error(`${uniqueHash} already exists.`); }
 
         // check if the user already registered an identity and prevent overriding if not explicitely specified
         if (override !== 'true') {
@@ -132,7 +136,7 @@ export class Identity extends BlockotusContract {
     /**
      * Check if a uniqueHash is already registered.
      * Each identity has a deterministic uniqueHash.
-     * 
+     *
      * @param {string} uniqueHash uniqueHash
      */
     private async hashExists(ctx: Context, uniqueHash: string): Promise<boolean> {
